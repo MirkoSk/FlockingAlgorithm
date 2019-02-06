@@ -34,19 +34,33 @@ public class Flock : MonoBehaviour
 
     // Private
     List<FlockAgent> agents = new List<FlockAgent>();
-	#endregion
-	
-	
-	
-	#region Public Properties
+    float squareMaxSpeed;
+    float squareNeighbourRadius;
+    float squareAvoidanceRadius;
+    #endregion
 
-	#endregion
-	
-	
-	
-	#region Unity Event Functions
-	private void Start () 
+
+
+    #region Public Properties
+    public float DriveFactor { get { return driveFactor; } }
+    public float MaxSpeed { get { return maxSpeed; } }
+    public float TurnRate { get { return turnRate; } }
+    public float NeighbourRadius { get { return neighbourRadius; } }
+    public float AvoidanceRadiusMultiplier { get { return avoidanceRadiusMultiplier; } }
+
+    public float SquareMaxSpeed { get { return squareMaxSpeed; } }
+    #endregion
+
+
+
+    #region Unity Event Functions
+    private void Start () 
 	{
+        // Set variables
+        squareMaxSpeed = maxSpeed * maxSpeed;
+        squareNeighbourRadius = neighbourRadius * neighbourRadius;
+        squareAvoidanceRadius = squareNeighbourRadius * avoidanceRadiusMultiplier * avoidanceRadiusMultiplier;
+
         // Instantiate Flock
         for (int i = 0; i < startingCount; i++)
         {
@@ -57,11 +71,7 @@ public class Flock : MonoBehaviour
                 transform
                 );
             newAgent.name = "Agent " + (i+1);
-            newAgent.DriveFactor = driveFactor;
-            newAgent.MaxSpeed = maxSpeed;
-            newAgent.TurnRate = turnRate;
-            newAgent.NeighbourRadius = neighbourRadius;
-            newAgent.AvoidanceRadiusMultiplier = avoidanceRadiusMultiplier;
+            newAgent.Flock = this;
 
             agents.Add(newAgent);
         }
@@ -80,11 +90,7 @@ public class Flock : MonoBehaviour
                 else renderer.material.SetColor("_BaseColor", Color.Lerp(Color.white, Color.red, context.Count / 10f));
             }
 
-            Vector3 move = behaviour.CalculateMove(agent, context, this);
-            move *= agent.DriveFactor;
-            if (move.sqrMagnitude > agent.SquareMaxSpeed) move = move.normalized * agent.MaxSpeed;
-
-            agent.Move(move);
+            agent.Move(behaviour.CalculateMove(agent, context, this));
         }
     }
     #endregion

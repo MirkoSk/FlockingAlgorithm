@@ -20,7 +20,7 @@ public class Composite : FlockBehaviour
     // Serialized Fields
 
     // Private
-    [SerializeField] BehaviourWeight[] behaviours;
+    [SerializeField] BehaviourWeight[] behaviours = null;
 	#endregion
 	
 	

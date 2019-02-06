@@ -30,7 +30,7 @@ public class Avoidance : FlockBehaviour
         List<Transform> objectsTooClose = new List<Transform>();
         foreach (Transform transform in context)
         {
-            if (Vector3.Distance(agent.transform.position, transform.position) <= agent.NeighbourRadius * agent.AvoidanceRadiusMultiplier)
+            if (Vector3.Distance(agent.transform.position, transform.position) <= flock.NeighbourRadius * flock.AvoidanceRadiusMultiplier)
             {
                 objectsTooClose.Add(transform);
             }
@@ -43,7 +43,7 @@ public class Avoidance : FlockBehaviour
             {
                 for (int i = 1; i < objectsTooClose.Count; i++)
                 {
-                    if (Vector3.Distance(agent.transform.position, objectsTooClose[i].position) <= agent.NeighbourRadius * agent.AvoidanceRadiusMultiplier)
+                    if (Vector3.Distance(agent.transform.position, objectsTooClose[i].position) <= flock.NeighbourRadius * flock.AvoidanceRadiusMultiplier)
                     {
                         bounds.Encapsulate(objectsTooClose[i].position);
                     }

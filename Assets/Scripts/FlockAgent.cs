@@ -11,18 +11,11 @@ public class FlockAgent : MonoBehaviour
 
     #region Variable Declarations
     // Serialized Fields
-    float driveFactor = 10f;
-    float maxSpeed = 5f;
-    public float TurnRate = 5f;
-    float neighbourRadius = 1.5f;
-    float avoidanceRadiusMultiplier = 0.5f;
+    public Flock Flock;
 
     // Private
     Collider agentCollider;
     MeshRenderer[] meshRenderers;
-    float squareMaxSpeed;
-    float squareNeighbourRadius;
-    float squareAvoidanceRadius;
     #endregion
 
 
@@ -30,37 +23,6 @@ public class FlockAgent : MonoBehaviour
     #region Public Properties
     public Collider AgentCollider { get { return agentCollider; } }
     public MeshRenderer[] MeshRenderers { get { return meshRenderers; } }
-    public float DriveFactor { get; set; }
-    public float MaxSpeed
-    {
-        get { return maxSpeed; }
-        set
-        {
-            maxSpeed = value;
-            squareMaxSpeed = maxSpeed * maxSpeed;
-        }
-    }
-    public float NeighbourRadius
-    {
-        get { return neighbourRadius; }
-        set
-        {
-            neighbourRadius = value;
-            squareNeighbourRadius = neighbourRadius * neighbourRadius;
-        }
-    }
-    public float AvoidanceRadiusMultiplier
-    {
-        get { return avoidanceRadiusMultiplier; }
-        set
-        {
-            avoidanceRadiusMultiplier = value;
-            squareAvoidanceRadius = squareNeighbourRadius * avoidanceRadiusMultiplier * avoidanceRadiusMultiplier;
-        }
-    }
-    public float SquareMaxSpeed { get { return squareMaxSpeed; } }
-    public float SquareNeighbourRadius { get { return squareNeighbourRadius; } }
-    public float SquareAvoidanceRadius { get { return squareAvoidanceRadius; } }
     #endregion
 
 
@@ -75,9 +37,9 @@ public class FlockAgent : MonoBehaviour
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.green;
-        Gizmos.DrawWireSphere(transform.position, NeighbourRadius);
+        Gizmos.DrawWireSphere(transform.position, Flock.NeighbourRadius);
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, NeighbourRadius * AvoidanceRadiusMultiplier);
+        Gizmos.DrawWireSphere(transform.position, Flock.NeighbourRadius * Flock.AvoidanceRadiusMultiplier);
     }
     #endregion
 
@@ -86,17 +48,24 @@ public class FlockAgent : MonoBehaviour
     #region Public Functions
     public void Move(Vector3 velocity)
     {
-        Vector3 lookDirection = Vector3.RotateTowards(transform.forward, velocity, TurnRate * Time.deltaTime, 0f);
+        // Manage speed
+        velocity *= Flock.DriveFactor;
+        if (velocity.sqrMagnitude > Flock.SquareMaxSpeed) velocity = velocity.normalized * Flock.MaxSpeed;
 
+        // Rotate depending on TurnRate
+        Vector3 lookDirection = Vector3.RotateTowards(transform.forward, velocity, Flock.TurnRate * Time.deltaTime, 0f);
         transform.rotation = Quaternion.LookRotation(lookDirection);
+
+        // Move
         transform.position += transform.forward * velocity.magnitude * Time.deltaTime;
+
     }
 
     public List<Transform> GetNearbyObjects()
     {
         List<Transform> context = new List<Transform>();
 
-        Collider[] contextColliders = Physics.OverlapSphere(transform.position, NeighbourRadius);
+        Collider[] contextColliders = Physics.OverlapSphere(transform.position, Flock.NeighbourRadius);
 
         foreach (Collider collider in contextColliders)
         {
