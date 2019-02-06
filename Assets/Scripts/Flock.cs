@@ -28,6 +28,9 @@ public class Flock : MonoBehaviour
     [Range(0f, 1f)]
     [SerializeField] float avoidanceRadiusMultiplier = 0.5f;
 
+    [Space]
+    [SerializeField] bool debug;
+
     [Header("References")]
     [SerializeField] FlockAgent agentPrefab = null;
     [SerializeField] FlockBehaviour behaviour = null;
@@ -66,11 +69,12 @@ public class Flock : MonoBehaviour
         {
             FlockAgent newAgent = Instantiate(
                 agentPrefab, 
-                Random.insideUnitSphere * startingCount * AgentDensity,
+                transform.position + Random.insideUnitSphere * startingCount * AgentDensity,
                 Random.rotation,
                 transform
                 );
             newAgent.name = "Agent " + (i+1);
+            newAgent.SetColor(Random.ColorHSV(0f, 1f, 0.5f, 1f, 0.5f, 1f, 0.04f, 0.04f));
             newAgent.Flock = this;
 
             agents.Add(newAgent);
@@ -84,10 +88,10 @@ public class Flock : MonoBehaviour
         {
             List<Transform> context = agent.GetNearbyObjects();
 
-            foreach (MeshRenderer renderer in agent.MeshRenderers)
+            if (debug)
             {
-                if (context.Count == 0) renderer.material.SetColor("_BaseColor", Color.black);
-                else renderer.material.SetColor("_BaseColor", Color.Lerp(Color.white, Color.red, context.Count / 10f));
+                if (context.Count == 0) agent.SetColor(Color.black);
+                else agent.SetColor(Color.Lerp(Color.white, Color.red, context.Count / 10f));
             }
 
             agent.Move(behaviour.CalculateMove(agent, context, this));

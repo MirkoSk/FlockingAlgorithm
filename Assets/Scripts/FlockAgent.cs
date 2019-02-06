@@ -16,6 +16,7 @@ public class FlockAgent : MonoBehaviour
     // Private
     Collider agentCollider;
     MeshRenderer[] meshRenderers;
+    TrailRenderer trailRenderer;
     #endregion
 
 
@@ -28,14 +29,17 @@ public class FlockAgent : MonoBehaviour
 
 
     #region Unity Event Functions
-    private void Start () 
+    private void Awake () 
 	{
         agentCollider = GetComponentInChildren<Collider>();
         meshRenderers = GetComponentsInChildren<MeshRenderer>();
+        trailRenderer = GetComponent<TrailRenderer>();
     }
 
     private void OnDrawGizmosSelected()
     {
+        if (Flock == null) return;
+
         Gizmos.color = Color.green;
         Gizmos.DrawWireSphere(transform.position, Flock.NeighbourRadius);
         Gizmos.color = Color.red;
@@ -76,6 +80,15 @@ public class FlockAgent : MonoBehaviour
         }
 
         return context;
+    }
+
+    public void SetColor(Color color)
+    {
+        foreach (MeshRenderer renderer in MeshRenderers)
+        {
+            renderer.material.SetColor("_BaseColor", color);
+        }
+        trailRenderer.material.SetColor("_UnlitColor", color);
     }
     #endregion
 
