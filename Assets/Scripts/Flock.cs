@@ -11,7 +11,7 @@ public class Flock : MonoBehaviour
     #region Variable Declarations
     // Serialized Fields
     [Header("Spawn")]
-    [Range(10, 500)]
+    [Range(10, 1000)]
     [SerializeField] int startingCount = 250;
     [Range(0.01f, 1f)]
     [SerializeField] float AgentDensity = 0.08f;
@@ -28,6 +28,10 @@ public class Flock : MonoBehaviour
     [Range(0f, 1f)]
     [SerializeField] float avoidanceRadiusMultiplier = 0.5f;
 
+    [Header("Update")]
+    [Range(0f, 1f)]
+    [SerializeField] float updateInterval = 0.1f;
+
     [Space]
     [SerializeField] bool debug;
 
@@ -40,6 +44,7 @@ public class Flock : MonoBehaviour
     float squareMaxSpeed;
     float squareNeighbourRadius;
     float squareAvoidanceRadius;
+    float timer;
     #endregion
 
 
@@ -83,18 +88,12 @@ public class Flock : MonoBehaviour
 
     private void Update()
     {
-        // Update all behaviours of all agents of this flock
-        foreach (FlockAgent agent in agents)
+        timer += Time.deltaTime;
+
+        if (timer >= updateInterval)
         {
-            List<Transform> context = agent.GetNearbyObjects();
-
-            if (debug)
-            {
-                if (context.Count == 0) agent.SetColor(Color.black);
-                else agent.SetColor(Color.Lerp(Color.white, Color.red, context.Count / 10f));
-            }
-
-            agent.Move(behaviour.CalculateMove(agent, context, this));
+            UpdateFlock();
+            timer = 0f;
         }
     }
     #endregion
@@ -108,7 +107,22 @@ public class Flock : MonoBehaviour
 
 
     #region Private Functions
-    
+    void UpdateFlock()
+    {
+        // Update all behaviours of all agents of this flock
+        foreach (FlockAgent agent in agents)
+        {
+            List<Transform> context = agent.GetNearbyObjects();
+
+            if (debug)
+            {
+                if (context.Count == 0) agent.SetColor(Color.black);
+                else agent.SetColor(Color.Lerp(Color.white, Color.red, context.Count / 10f));
+            }
+
+            agent.Move(behaviour.CalculateMove(agent, context, this), Time.deltaTime);
+        }
+    }
     #endregion
 
 

@@ -27,26 +27,30 @@ public class Avoidance : FlockBehaviour
     #region Public Functions
     public override Vector3 CalculateMove(FlockAgent agent, List<Transform> context, Flock flock)
     {
-        List<Transform> objectsTooClose = new List<Transform>();
+        // Create list with objects that are too close
+        List<Vector3> objectsTooClose = new List<Vector3>();
         foreach (Transform transform in context)
         {
-            if (Vector3.Distance(agent.transform.position, transform.position) <= flock.NeighbourRadius * flock.AvoidanceRadiusMultiplier)
+            if (transform.tag == Constants.TAG_AGENT && Vector3.Distance(agent.transform.position, transform.position) <= flock.NeighbourRadius * flock.AvoidanceRadiusMultiplier)
             {
-                objectsTooClose.Add(transform);
+                objectsTooClose.Add(transform.position);
+            }
+            else if(transform.tag == Constants.TAG_WALL)
+            {
+                Collider wallCollider = transform.GetComponent<Collider>();
+                Vector3 closestPointOnWall = wallCollider.ClosestPointOnBounds(agent.transform.position);
+                objectsTooClose.Add(closestPointOnWall);
             }
         }
 
         if (objectsTooClose.Count > 0)
         {
-            Bounds bounds = new Bounds(objectsTooClose[0].position, Vector3.zero);
+            Bounds bounds = new Bounds(objectsTooClose[0], Vector3.zero);
             if (objectsTooClose.Count > 1)
             {
                 for (int i = 1; i < objectsTooClose.Count; i++)
                 {
-                    if (Vector3.Distance(agent.transform.position, objectsTooClose[i].position) <= flock.NeighbourRadius * flock.AvoidanceRadiusMultiplier)
-                    {
-                        bounds.Encapsulate(objectsTooClose[i].position);
-                    }
+                    bounds.Encapsulate(objectsTooClose[i]);
                 }
             }
 

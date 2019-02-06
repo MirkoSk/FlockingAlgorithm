@@ -31,7 +31,8 @@ public class Alignment : FlockBehaviour
 
         foreach (Transform transform in context)
         {
-            averageDirection += transform.forward;
+            if (transform.tag == Constants.TAG_AGENT)
+                averageDirection += transform.forward;
         }
 
         return averageDirection.normalized;

@@ -31,7 +31,8 @@ public class Cohesion : FlockBehaviour
         Bounds bounds = new Bounds(agent.transform.position, Vector3.zero);
         for (int i = 0; i < context.Count; i++)
         {
-            bounds.Encapsulate(context[i].position);
+            if (context[i].tag == Constants.TAG_AGENT)
+                bounds.Encapsulate(context[i].position);
         }
 
         Vector3 target = bounds.center;

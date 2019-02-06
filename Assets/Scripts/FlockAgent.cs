@@ -17,6 +17,7 @@ public class FlockAgent : MonoBehaviour
     Collider agentCollider;
     MeshRenderer[] meshRenderers;
     TrailRenderer trailRenderer;
+    Vector3 moveVector;
     #endregion
 
 
@@ -24,6 +25,7 @@ public class FlockAgent : MonoBehaviour
     #region Public Properties
     public Collider AgentCollider { get { return agentCollider; } }
     public MeshRenderer[] MeshRenderers { get { return meshRenderers; } }
+    public Vector3 MoveVector { get; set; }
     #endregion
 
 
@@ -50,18 +52,18 @@ public class FlockAgent : MonoBehaviour
 
 
     #region Public Functions
-    public void Move(Vector3 velocity)
+    public void Move(Vector3 velocity, float deltaTime)
     {
         // Manage speed
         velocity *= Flock.DriveFactor;
         if (velocity.sqrMagnitude > Flock.SquareMaxSpeed) velocity = velocity.normalized * Flock.MaxSpeed;
 
         // Rotate depending on TurnRate
-        Vector3 lookDirection = Vector3.RotateTowards(transform.forward, velocity, Flock.TurnRate * Time.deltaTime, 0f);
+        Vector3 lookDirection = Vector3.RotateTowards(transform.forward, velocity, Flock.TurnRate * deltaTime, 0f);
         transform.rotation = Quaternion.LookRotation(lookDirection);
 
         // Move
-        transform.position += transform.forward * velocity.magnitude * Time.deltaTime;
+        transform.position += transform.forward * velocity.magnitude * deltaTime;
 
     }
 
