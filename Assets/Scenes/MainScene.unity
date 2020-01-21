@@ -728,7 +728,7 @@ MonoBehaviour:
   turnRate: 1
   neighbourRadius: 10
   avoidanceRadiusMultiplier: 0.5
-  updateInterval: 0
+  updateGroups: 2
   debug: 0
   agentPrefab: {fileID: 2960853442335726851, guid: ecd0279e277909f4ab5ca6d0662f4c98,
     type: 3}

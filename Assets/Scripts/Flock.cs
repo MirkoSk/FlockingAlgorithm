@@ -29,11 +29,10 @@ public class Flock : MonoBehaviour
     [SerializeField] float avoidanceRadiusMultiplier = 0.5f;
 
     [Header("Update")]
-    [Range(0f, 1f)]
-    [SerializeField] float updateInterval = 0.1f;
+    [SerializeField] int updateGroups = 2;
 
     [Space]
-    [SerializeField] bool debug;
+    [SerializeField] bool debug = false;
 
     [Header("References")]
     [SerializeField] FlockAgent agentPrefab = null;
@@ -44,7 +43,7 @@ public class Flock : MonoBehaviour
     float squareMaxSpeed;
     float squareNeighbourRadius;
     float squareAvoidanceRadius;
-    float timer;
+    int currentUpdateGroup;
     #endregion
 
 
@@ -75,8 +74,7 @@ public class Flock : MonoBehaviour
             FlockAgent newAgent = Instantiate(
                 agentPrefab, 
                 transform.position + Random.insideUnitSphere * startingCount * AgentDensity,
-                Random.rotation,
-                transform
+                Random.rotation
                 );
             newAgent.name = "Agent " + (i+1);
             newAgent.SetColor(Random.ColorHSV(0f, 1f, 0.5f, 1f, 0.5f, 1f, 0.04f, 0.04f));
@@ -86,15 +84,14 @@ public class Flock : MonoBehaviour
         }
 	}
 
-    private void Update()
+    private void FixedUpdate()
     {
-        timer += Time.deltaTime;
+        currentUpdateGroup++;
+        if (currentUpdateGroup > updateGroups) currentUpdateGroup = 1;
 
-        if (timer >= updateInterval)
-        {
-            UpdateFlock();
-            timer = 0f;
-        }
+        int startingAgent = (agents.Count / updateGroups) * (currentUpdateGroup - 1);
+
+        UpdateFlock(startingAgent, agents.Count / updateGroups);
     }
     #endregion
 
@@ -107,20 +104,20 @@ public class Flock : MonoBehaviour
 
 
     #region Private Functions
-    void UpdateFlock()
+    void UpdateFlock(int firstAgent, int numberOfAgents)
     {
         // Update all behaviours of all agents of this flock
-        foreach (FlockAgent agent in agents)
+        for (int i = firstAgent; i < firstAgent + numberOfAgents; i++)
         {
-            List<Transform> context = agent.GetNearbyObjects();
+            List<Transform> context = agents[i].GetNearbyObjects();
 
             if (debug)
             {
-                if (context.Count == 0) agent.SetColor(Color.black);
-                else agent.SetColor(Color.Lerp(Color.white, Color.red, context.Count / 10f));
+                if (context.Count == 0) agents[i].SetColor(Color.black);
+                else agents[i].SetColor(Color.Lerp(Color.white, Color.red, context.Count / 10f));
             }
 
-            agent.Move(behaviour.CalculateMove(agent, context, this), Time.deltaTime);
+            agents[i].Move(behaviour.CalculateMove(agents[i], context, this), Time.deltaTime * updateGroups);
         }
     }
     #endregion
